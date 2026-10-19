@@ -1,0 +1,20 @@
+{
+  "description": "marketplace-service authorizes now and captures on shipment",
+  "consumer": "marketplace-service",
+  "request": {
+    "method": "POST",
+    "path": "/api/v2/payments",
+    "headers": { "Idempotency-Key": "{{uuid}}" },
+    "body": { "amountMinor": 15000, "currency": "EUR", "merchantReference": "basket-contract-2", "capture": false }
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "id": "type:string",
+      "status": "AUTHORIZED",
+      "amountMinor": 15000,
+      "currency": "EUR",
+      "capturedMinor": 0
+    }
+  }
+}

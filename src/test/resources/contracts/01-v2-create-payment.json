@@ -1,0 +1,27 @@
+{
+  "description": "checkout-service creates and captures a card payment",
+  "consumer": "checkout-service",
+  "request": {
+    "method": "POST",
+    "path": "/api/v2/payments",
+    "headers": { "Idempotency-Key": "{{uuid}}" },
+    "body": { "amountMinor": 2598, "currency": "USD", "merchantReference": "order-contract-1", "capture": true }
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "id": "type:string",
+      "merchantReference": "order-contract-1",
+      "status": "CAPTURED",
+      "amountMinor": 2598,
+      "currency": "USD",
+      "capturedMinor": 2598,
+      "refundedMinor": 0,
+      "refundableMinor": 2598,
+      "pspReference": "type:string",
+      "createdAt": "type:string",
+      "refunds": "type:array",
+      "disputes": "type:array"
+    }
+  }
+}

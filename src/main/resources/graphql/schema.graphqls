@@ -1,0 +1,65 @@
+scalar Long
+
+type Query {
+    payment(id: ID!): Payment
+    payments(status: PaymentStatus, limit: Int = 20): [Payment!]!
+}
+
+enum PaymentStatus {
+    PENDING
+    AUTHORIZED
+    CAPTURED
+    PARTIALLY_REFUNDED
+    REFUNDED
+    VOIDED
+    FAILED
+    DISPUTED
+    CHARGED_BACK
+}
+
+enum RefundStatus {
+    PENDING
+    SUCCEEDED
+    FAILED
+}
+
+enum DisputeStatus {
+    OPEN
+    WON
+    LOST
+}
+
+type Payment {
+    id: ID!
+    merchantReference: String!
+    status: PaymentStatus!
+    "Amounts are integer minor units (cents) of `currency`."
+    amountMinor: Long!
+    currency: String!
+    capturedMinor: Long!
+    refundedMinor: Long!
+    pendingRefundMinor: Long!
+    refundableMinor: Long!
+    pspReference: String
+    failureCode: String
+    createdAt: String!
+    updatedAt: String!
+    refunds: [Refund!]!
+    disputes: [Dispute!]!
+}
+
+type Refund {
+    id: ID!
+    amountMinor: Long!
+    status: RefundStatus!
+    reason: String
+    createdAt: String!
+}
+
+type Dispute {
+    id: ID!
+    amountMinor: Long!
+    status: DisputeStatus!
+    reason: String
+    createdAt: String!
+}

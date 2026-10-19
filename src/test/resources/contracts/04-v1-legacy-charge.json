@@ -1,0 +1,24 @@
+{
+  "description": "legacy invoicing-service still uses v1 until the sunset date",
+  "consumer": "invoicing-service",
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/charges",
+    "body": { "amount": 49.5, "currency": "USD", "reference": "inv-contract-4" }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Deprecation": "@",
+      "Sunset": "2027",
+      "Link": "successor-version"
+    },
+    "body": {
+      "id": "type:string",
+      "amount": "49.50",
+      "currency": "USD",
+      "status": "succeeded",
+      "reference": "inv-contract-4"
+    }
+  }
+}

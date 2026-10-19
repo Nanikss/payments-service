@@ -1,0 +1,18 @@
+{
+  "description": "checkout-service shows the decline reason from failureCode",
+  "consumer": "checkout-service",
+  "request": {
+    "method": "POST",
+    "path": "/api/v2/payments",
+    "headers": { "Idempotency-Key": "{{uuid}}" },
+    "body": { "amountMinor": 2005, "currency": "USD", "merchantReference": "order-contract-5" }
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "status": "FAILED",
+      "failureCode": "insufficient_funds",
+      "capturedMinor": 0
+    }
+  }
+}

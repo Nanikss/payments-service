@@ -1,0 +1,21 @@
+{
+  "description": "all consumers rely on RFC 7807 problem details with a stable error code",
+  "consumer": "all",
+  "request": {
+    "method": "POST",
+    "path": "/api/v2/payments",
+    "headers": { "Idempotency-Key": "{{uuid}}" },
+    "body": { "amountMinor": 0, "currency": "USD", "merchantReference": "order-contract-3" }
+  },
+  "response": {
+    "status": 400,
+    "headers": { "Content-Type": "application/problem+json" },
+    "body": {
+      "title": "Bad Request",
+      "status": 400,
+      "detail": "type:string",
+      "code": "validation_failed",
+      "errors": { "amountMinor": "type:string" }
+    }
+  }
+}
