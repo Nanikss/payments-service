@@ -1,0 +1,66 @@
+# GitLab CI/CD: build -> test (H2 + MySQL/Testcontainers + embedded Kafka) -> package (Docker image)
+stages:
+  - build
+  - test
+  - package
+
+default:
+  image: eclipse-temurin:17-jdk
+  cache:
+    key:
+      files:
+        - gradle/wrapper/gradle-wrapper.properties
+        - build.gradle.kts
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+
+variables:
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+compile:
+  stage: build
+  script:
+    - ./gradlew compileKotlin compileTestKotlin
+
+test:
+  stage: test
+  # Docker-in-Docker so the MySQL Testcontainers tests run against a real MySQL 8.4.
+  services:
+    - name: docker:27-dind
+      alias: docker
+      command: ["--tls=false"]
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_TLS_CERTDIR: ""
+    TESTCONTAINERS_HOST_OVERRIDE: "docker"
+  script:
+    - ./gradlew test jacocoTestReport
+    - awk -F, 'NR>1 { missed += $8; covered += $9 } END { printf "Line coverage: %.1f%%\n", 100 * covered / (missed + covered) }' build/reports/jacoco/test/jacocoTestReport.csv || true
+  coverage: '/Line coverage: \d+\.\d+%/'
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/TEST-*.xml
+      coverage_report:
+        coverage_format: jacoco
+        path: build/reports/jacoco/test/jacocoTestReport.xml
+    paths:
+      - build/reports/
+    expire_in: 1 week
+
+docker-image:
+  stage: package
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -t "$CI_REGISTRY_IMAGE:latest" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
