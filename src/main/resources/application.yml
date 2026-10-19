@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: payments-service
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/payments}
+    username: ${DB_USER:payments}
+    password: ${DB_PASSWORD:payments}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none   # schema is owned by Flyway
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      properties:
+        enable.idempotence: true
+  graphql:
+    graphiql:
+      enabled: true
+
+payments:
+  psp:
+    retry:
+      max-attempts: 3
+      backoff: 200ms
+  webhook:
+    # Comma-separated; list the new secret first during rotation and drop the old one afterwards.
+    secrets: ${WEBHOOK_SECRETS:whsec_local_dev_only}
+    tolerance: 5m
+  outbox:
+    topic: payment-events
+    relay:
+      enabled: ${OUTBOX_RELAY_ENABLED:true}
+      poll-interval-ms: 500
+      batch-size: 100
+  idempotency:
+    retention: 24h
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
